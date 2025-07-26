@@ -32,7 +32,7 @@ interface AlertState {
 
 export function DashboardClient({ initialLocations }: DashboardClientProps) {
   const [locations, setLocations] = useState<Location[]>(initialLocations);
-  const [selectedLocation, setSelectedLocation] = useState<Location | null>(locations[0] || null);
+  const [selectedLocation, setSelectedLocation] = useState<Location | null>(initialLocations?.[0] || null);
   const [isAIPending, startAITransition] = useTransition();
   const [isAddingLocation, startAddingLocationTransition] = useTransition();
   const [alertState, setAlertState] = useState<AlertState>({ open: false, title: '', message: '', data: [] });
