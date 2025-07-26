@@ -1,17 +1,20 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { AlertTriangle, BrainCircuit, Loader2, MapPin, Search, Sparkles, Users } from 'lucide-react';
-import { getCrowdAlert } from '@/app/actions';
+import { AlertTriangle, BrainCircuit, Loader2, MapPin, PlusCircle, Search, Sparkles, Users } from 'lucide-react';
+import { getCrowdAlert, addNewLocation } from '@/app/actions';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { HistoricalChart } from './historical-chart';
 import type { Location } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { Input } from './ui/input';
+import { Label } from './ui/label';
+import { useToast } from '@/hooks/use-toast';
+
 
 interface DashboardClientProps {
   locations: Location[];
@@ -23,11 +26,16 @@ interface AlertState {
   message: string;
 }
 
-export function DashboardClient({ locations }: DashboardClientProps) {
+export function DashboardClient({ locations: initialLocations }: DashboardClientProps) {
+  const [locations, setLocations] = useState<Location[]>(initialLocations);
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(locations[0] || null);
   const [isAIPending, startAITransition] = useTransition();
+  const [isAddingLocation, startAddingLocationTransition] = useTransition();
   const [alertState, setAlertState] = useState<AlertState>({ open: false, title: '', message: '' });
   const [searchTerm, setSearchTerm] = useState('');
+  const [newLocationName, setNewLocationName] = useState('');
+  const [isAddLocationDialogOpen, setAddLocationDialogOpen] = useState(false);
+  const { toast } = useToast();
 
   const handleGetAIAlert = (location: Location) => {
     startAITransition(async () => {
@@ -43,6 +51,36 @@ export function DashboardClient({ locations }: DashboardClientProps) {
           open: true,
           title: 'Error',
           message: result.message,
+        });
+      }
+    });
+  };
+
+  const handleAddNewLocation = () => {
+    if (!newLocationName.trim()) {
+      toast({
+        variant: 'destructive',
+        title: 'Validation Error',
+        description: 'Please enter a name for the new location.',
+      });
+      return;
+    }
+    startAddingLocationTransition(async () => {
+      const result = await addNewLocation(newLocationName);
+      if (result.success && result.location) {
+        setLocations(prev => [...prev, result.location!]);
+        setSelectedLocation(result.location);
+        setNewLocationName('');
+        setAddLocationDialogOpen(false);
+        toast({
+          title: 'Location Added',
+          description: `Successfully added ${result.location.name}.`,
+        });
+      } else {
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: result.message,
         });
       }
     });
@@ -69,6 +107,45 @@ export function DashboardClient({ locations }: DashboardClientProps) {
         <div className="lg:col-span-1 flex flex-col gap-4">
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold tracking-tight">Locations</h2>
+            <Dialog open={isAddLocationDialogOpen} onOpenChange={setAddLocationDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Add Location
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Add a New Location</DialogTitle>
+                  <DialogDescription>
+                    Enter a name for the new location. Our AI will generate realistic data for it.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="name" className="text-right">
+                      Name
+                    </Label>
+                    <Input
+                      id="name"
+                      value={newLocationName}
+                      onChange={(e) => setNewLocationName(e.target.value)}
+                      className="col-span-3"
+                      placeholder="e.g., Grand Central Market"
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button
+                    onClick={handleAddNewLocation}
+                    disabled={isAddingLocation}
+                  >
+                    {isAddingLocation && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Generate & Add
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />

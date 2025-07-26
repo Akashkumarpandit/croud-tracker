@@ -2,6 +2,7 @@
 
 import { crowdDensityAlert } from '@/ai/flows/crowd-density-alert';
 import { detectCrowdFromImage } from '@/ai/flows/detect-crowd-flow';
+import { generateLocationData } from '@/ai/flows/generate-location-data-flow';
 import type { Location } from '@/lib/types';
 
 export async function getCrowdAlert(location: Location) {
@@ -29,5 +30,20 @@ export async function getRealtimeCrowdDensity(imageDataUri: string) {
   } catch (error) {
     console.error('Error detecting crowd from image:', error);
     return { success: false, message: 'Failed to analyze image.' };
+  }
+}
+
+export async function addNewLocation(locationName: string) {
+  try {
+    const result = await generateLocationData({ locationName });
+    const newLocation: Location = {
+      id: `loc_${Date.now()}`,
+      name: locationName,
+      ...result,
+    };
+    return { success: true, location: newLocation };
+  } catch (error) {
+    console.error('Error generating location data:', error);
+    return { success: false, message: 'Failed to generate location data.' };
   }
 }
