@@ -40,6 +40,8 @@ export async function addNewLocation(locationName: string) {
     const newLocation: Location = {
       id: `loc_${Date.now()}`,
       name: locationName,
+      imageUrl: 'https://placehold.co/600x400.png',
+      dataAiHint: result.dataAiHint,
       ...result,
     };
     return { success: true, location: newLocation };

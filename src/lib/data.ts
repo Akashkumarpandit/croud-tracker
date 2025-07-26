@@ -17,6 +17,8 @@ export const locations: Location[] = [
       { time: '4pm', density: 65 },
       { time: '5pm', density: 68 },
     ],
+    imageUrl: 'https://placehold.co/600x400.png',
+    dataAiHint: 'city plaza',
   },
   {
     id: 'loc_2',
@@ -34,6 +36,8 @@ export const locations: Location[] = [
       { time: '4pm', density: 30 },
       { time: '5pm', density: 35 },
     ],
+    imageUrl: 'https://placehold.co/600x400.png',
+    dataAiHint: 'city park',
   },
   {
     id: 'loc_3',
@@ -51,6 +55,8 @@ export const locations: Location[] = [
       { time: '4pm', density: 190 },
       { time: '5pm', density: 180 },
     ],
+    imageUrl: 'https://placehold.co/600x400.png',
+    dataAiHint: 'train station',
   },
   {
     id: 'loc_4',
@@ -68,5 +74,7 @@ export const locations: Location[] = [
       { time: '4pm', density: 140 },
       { time: '5pm', density: 150 },
     ],
+    imageUrl: 'https://placehold.co/600x400.png',
+    dataAiHint: 'shopping mall',
   },
 ];

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import Image from 'next/image';
 import { BrainCircuit, Loader2, MapPin, PlusCircle, Search, Sparkles, Users, LineChart as LineChartIcon } from 'lucide-react';
 import { getCrowdAlert, addNewLocation } from '@/app/actions';
 import { Badge } from '@/components/ui/badge';
@@ -180,16 +181,27 @@ export function DashboardClient({ locations: initialLocations }: DashboardClient
                     )}
                     onClick={() => setSelectedLocation(location)}
                   >
-                    <CardHeader>
-                      <CardTitle className="flex items-center justify-between">
-                        <span className="flex items-center gap-2">
-                          <MapPin className="h-5 w-5" />
-                          {location.name}
-                        </span>
-                        <Badge variant={densityInfo.variant} className={densityInfo.className}>
-                          {densityInfo.level}
-                        </Badge>
-                      </CardTitle>
+                    <CardHeader className='p-0'>
+                      <div className="relative aspect-[16/9] w-full">
+                         <Image
+                            src={location.imageUrl}
+                            alt={location.name}
+                            fill
+                            className="rounded-t-lg object-cover"
+                            data-ai-hint={location.dataAiHint}
+                         />
+                      </div>
+                      <div className="p-6">
+                        <CardTitle className="flex items-center justify-between">
+                          <span className="flex items-center gap-2">
+                            <MapPin className="h-5 w-5" />
+                            {location.name}
+                          </span>
+                          <Badge variant={densityInfo.variant} className={densityInfo.className}>
+                            {densityInfo.level}
+                          </Badge>
+                        </CardTitle>
+                      </div>
                     </CardHeader>
                     <CardContent>
                       <div className="flex items-center gap-2 text-muted-foreground">

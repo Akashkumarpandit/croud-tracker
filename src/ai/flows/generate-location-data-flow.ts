@@ -21,7 +21,8 @@ const GenerateLocationDataOutputSchema = z.object({
     historicalData: z.array(z.object({
         time: z.string().describe("The time of the data point, e.g., '9am', '10am'."),
         density: z.number().describe('The crowd density at that time.'),
-    })).length(9).describe('An array of 9 historical data points representing a typical day from 9am to 5pm.')
+    })).length(9).describe('An array of 9 historical data points representing a typical day from 9am to 5pm.'),
+    dataAiHint: z.string().max(2).describe("Two keywords that describe the location, to be used for image search, e.g., 'city plaza' or 'shopping mall'."),
 });
 export type GenerateLocationDataOutput = z.infer<typeof GenerateLocationDataOutputSchema>;
 
@@ -41,6 +42,7 @@ Generate the following:
 1. A realistic maximum capacity for this type of location.
 2. A series of 9 historical crowd density data points for a typical day (9am to 5pm). The crowd levels should show a plausible daily pattern (e.g., lower in the morning, peaking midday, and then tapering off).
 3. A realistic current density, which must be the same as the density of the last historical data point (5pm).
+4. A two-word hint for an AI image generator to create a picture of this location.
 
 For example, a "plaza" might have a higher capacity than a small "cafe". A "station" would have peaks during commute times.
 `,
