@@ -20,9 +20,9 @@ export function HistoricalChart({ data }: HistoricalChartProps) {
         <CardDescription>Crowd levels over the past few hours.</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="h-80 w-full">
+        <div className="h-80 w-full md:h-96">
           <ResponsiveContainer>
-            <LineChart data={data} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+            <LineChart data={data} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
               <XAxis dataKey="time" stroke="hsl(var(--muted-foreground))" fontSize={12} />
               <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />

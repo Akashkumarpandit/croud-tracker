@@ -2,7 +2,6 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import Image from 'next/image';
 import { BrainCircuit, Loader2, MapPin, PlusCircle, Search, Sparkles, Users, LineChart as LineChartIcon } from 'lucide-react';
 import { getCrowdAlert, addNewLocation } from '@/app/actions';
 import { Badge } from '@/components/ui/badge';
@@ -44,18 +43,18 @@ export function DashboardClient({ initialLocations }: DashboardClientProps) {
   const handleGetAIAlert = (location: Location) => {
     startAITransition(async () => {
       const result = await getCrowdAlert(location);
-      if (result.success) {
+      if (result.success && result.predictedData && result.predictionText) {
         setAlertState({
           open: true,
           title: `AI Prediction for ${location.name}`,
-          message: result.predictionText!,
-          data: result.predictedData!,
+          message: result.predictionText,
+          data: result.predictedData,
         });
       } else {
         toast({
           variant: 'destructive',
           title: 'Error',
-          description: result.message,
+          description: result.message ?? 'An unknown error occurred.',
         });
       }
     });
@@ -118,117 +117,123 @@ export function DashboardClient({ initialLocations }: DashboardClientProps) {
     <>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-1 flex flex-col gap-4">
-          <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold tracking-tight">Locations</h2>
-            <Dialog open={isAddLocationDialogOpen} onOpenChange={setAddLocationDialogOpen}>
-              <DialogTrigger asChild>
-                <Button variant="outline" size="sm">
-                  <PlusCircle className="mr-2 h-4 w-4" />
-                  Add Location
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Add a New Location</DialogTitle>
-                  <DialogDescription>
-                    Enter a name for the new location. Our AI will generate realistic data for it.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="name" className="text-right">
-                      Name
-                    </Label>
-                    <Input
-                      id="name"
-                      value={newLocationName}
-                      onChange={(e) => setNewLocationName(e.target.value)}
-                      className="col-span-3"
-                      placeholder="e.g., Grand Central Market"
-                    />
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button
-                    onClick={handleAddNewLocation}
-                    disabled={isAddingLocation}
-                  >
-                    {isAddingLocation && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Generate & Add
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </div>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search locations..."
-              className="pl-9"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          <div className="flex flex-col gap-4 max-h-[calc(100vh-220px)] overflow-y-auto pr-2">
-            {filteredLocations.length > 0 ? (
-              filteredLocations.map((location) => {
-                const densityInfo = getDensityInfo(location.currentDensity, location.maxCapacity);
-                return (
-                  <Card
-                    key={location.id}
-                    className={cn(
-                      'cursor-pointer transition-all hover:shadow-lg',
-                      selectedLocation?.id === location.id ? 'ring-2 ring-primary' : 'hover:ring-2 hover:ring-primary/50'
-                    )}
-                    onClick={() => setSelectedLocation(location)}
-                  >
-                    <CardHeader>
-                      <CardTitle className="flex items-center justify-between">
-                        <span className="flex items-center gap-2">
-                          <MapPin className="h-5 w-5" />
-                          {location.name}
-                        </span>
-                        <Badge variant={densityInfo.variant} className={densityInfo.className}>
-                          {densityInfo.level}
-                        </Badge>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <Users className="h-5 w-5" />
-                        <span>
-                          Current Density: {location.currentDensity} / {location.maxCapacity}
-                        </span>
+          <Card>
+            <CardHeader>
+              <div className="flex flex-col sm:flex-row justify-between items-center gap-2">
+                <h2 className="text-2xl font-bold tracking-tight">Locations</h2>
+                <Dialog open={isAddLocationDialogOpen} onOpenChange={setAddLocationDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="sm" className="w-full sm:w-auto">
+                      <PlusCircle className="mr-2 h-4 w-4" />
+                      Add Location
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Add a New Location</DialogTitle>
+                      <DialogDescription>
+                        Enter a name for the new location. Our AI will generate realistic data for it.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                      <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="name" className="text-right">
+                          Name
+                        </Label>
+                        <Input
+                          id="name"
+                          value={newLocationName}
+                          onChange={(e) => setNewLocationName(e.target.value)}
+                          className="col-span-3"
+                          placeholder="e.g., Grand Central Market"
+                        />
                       </div>
-                    </CardContent>
-                    <CardFooter>
+                    </div>
+                    <DialogFooter>
                       <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleGetAIAlert(location);
-                        }}
-                        disabled={isAIPending}
+                        onClick={handleAddNewLocation}
+                        disabled={isAddingLocation}
                       >
-                        {isAIPending ? (
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        ) : (
-                          <Sparkles className="mr-2 h-4 w-4" />
-                        )}
-                        Get AI Prediction
+                        {isAddingLocation && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Generate & Add
                       </Button>
-                    </CardFooter>
-                  </Card>
-                );
-              })
-            ) : (
-              <div className="text-center text-muted-foreground py-8">
-                No locations found.
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
               </div>
-            )}
-          </div>
+              <div className="relative mt-4">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search locations..."
+                  className="pl-9"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col gap-4 max-h-[calc(100vh-320px)] sm:max-h-[calc(100vh-280px)] overflow-y-auto pr-2">
+                {filteredLocations.length > 0 ? (
+                  filteredLocations.map((location) => {
+                    const densityInfo = getDensityInfo(location.currentDensity, location.maxCapacity);
+                    return (
+                      <Card
+                        key={location.id}
+                        className={cn(
+                          'cursor-pointer transition-all hover:shadow-lg',
+                          selectedLocation?.id === location.id ? 'ring-2 ring-primary' : 'hover:ring-2 hover:ring-primary/50'
+                        )}
+                        onClick={() => setSelectedLocation(location)}
+                      >
+                        <CardHeader>
+                          <CardTitle className="flex items-center justify-between text-base">
+                            <span className="flex items-center gap-2">
+                              <MapPin className="h-5 w-5" />
+                              {location.name}
+                            </span>
+                            <Badge variant={densityInfo.variant} className={densityInfo.className}>
+                              {densityInfo.level}
+                            </Badge>
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <Users className="h-5 w-5" />
+                            <span>
+                              Current Density: {location.currentDensity} / {location.maxCapacity}
+                            </span>
+                          </div>
+                        </CardContent>
+                        <CardFooter>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="w-full"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleGetAIAlert(location);
+                            }}
+                            disabled={isAIPending}
+                          >
+                            {isAIPending ? (
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            ) : (
+                              <Sparkles className="mr-2 h-4 w-4" />
+                            )}
+                            Get AI Prediction
+                          </Button>
+                        </CardFooter>
+                      </Card>
+                    );
+                  })
+                ) : (
+                  <div className="text-center text-muted-foreground py-8">
+                    No locations found.
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
         </div>
         <div className="lg:col-span-2">
           {selectedLocation ? (
