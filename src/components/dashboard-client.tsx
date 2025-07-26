@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { AlertTriangle, BrainCircuit, Loader2, MapPin, PlusCircle, Search, Sparkles, Users } from 'lucide-react';
+import { BrainCircuit, Loader2, MapPin, PlusCircle, Search, Sparkles, Users, LineChart as LineChartIcon } from 'lucide-react';
 import { getCrowdAlert, addNewLocation } from '@/app/actions';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,7 @@ import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { useToast } from '@/hooks/use-toast';
+import { Line, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
 
 interface DashboardClientProps {
@@ -24,6 +25,7 @@ interface AlertState {
   open: boolean;
   title: string;
   message: string;
+  data: { time: string; density: number }[];
 }
 
 export function DashboardClient({ locations: initialLocations }: DashboardClientProps) {
@@ -31,7 +33,7 @@ export function DashboardClient({ locations: initialLocations }: DashboardClient
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(locations[0] || null);
   const [isAIPending, startAITransition] = useTransition();
   const [isAddingLocation, startAddingLocationTransition] = useTransition();
-  const [alertState, setAlertState] = useState<AlertState>({ open: false, title: '', message: '' });
+  const [alertState, setAlertState] = useState<AlertState>({ open: false, title: '', message: '', data: [] });
   const [searchTerm, setSearchTerm] = useState('');
   const [newLocationName, setNewLocationName] = useState('');
   const [isAddLocationDialogOpen, setAddLocationDialogOpen] = useState(false);
@@ -43,14 +45,15 @@ export function DashboardClient({ locations: initialLocations }: DashboardClient
       if (result.success) {
         setAlertState({
           open: true,
-          title: `AI Alert for ${location.name}`,
-          message: result.message,
+          title: `AI Prediction for ${location.name}`,
+          message: result.predictionText!,
+          data: result.predictedData!,
         });
       } else {
-        setAlertState({
-          open: true,
+        toast({
+          variant: 'destructive',
           title: 'Error',
-          message: result.message,
+          description: result.message,
         });
       }
     });
@@ -100,6 +103,14 @@ export function DashboardClient({ locations: initialLocations }: DashboardClient
   const filteredLocations = locations.filter((location) =>
     location.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const combinedChartData = selectedLocation
+    ? [
+        ...selectedLocation.historicalData.map(d => ({ ...d, type: 'Historical' })),
+        ...alertState.data.map(d => ({ ...d, type: 'Predicted' })),
+      ]
+    : [];
+
 
   return (
     <>
@@ -230,20 +241,64 @@ export function DashboardClient({ locations: initialLocations }: DashboardClient
         </div>
       </div>
       <Dialog open={alertState.open} onOpenChange={(open) => setAlertState({ ...alertState, open })}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-2xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <BrainCircuit className="h-6 w-6 text-primary" />
               {alertState.title}
             </DialogTitle>
           </DialogHeader>
-          <Alert>
-            <AlertTriangle className="h-4 w-4" />
-            <AlertTitle>Prediction</AlertTitle>
-            <AlertDescription>
-              {alertState.message}
-            </AlertDescription>
-          </Alert>
+            <Alert>
+              <Sparkles className="h-4 w-4" />
+              <AlertTitle>AI Summary</AlertTitle>
+              <AlertDescription>
+                {alertState.message}
+              </AlertDescription>
+            </Alert>
+            <Card>
+              <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-base">
+                      <LineChartIcon className="h-5 w-5" />
+                      Predicted Crowd Density
+                  </CardTitle>
+              </CardHeader>
+              <CardContent>
+                  <div className="h-60 w-full">
+                      <ResponsiveContainer>
+                          <LineChart data={combinedChartData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                              <CartesianGrid strokeDasharray="3 3" />
+                              <XAxis dataKey="time" />
+                              <YAxis />
+                              <Tooltip
+                                contentStyle={{
+                                  backgroundColor: 'hsl(var(--card))',
+                                  borderColor: 'hsl(var(--border))',
+                                }}
+                              />
+                              <Legend />
+                              <Line
+                                  name="Historical"
+                                  type="monotone"
+                                  dataKey="density"
+                                  stroke="hsl(var(--primary))"
+                                  strokeWidth={2}
+                                  data={selectedLocation?.historicalData}
+                                  dot={false}
+                              />
+                              <Line
+                                  name="Predicted"
+                                  type="monotone"
+                                  dataKey="density"
+                                  stroke="hsl(var(--accent))"
+                                  strokeWidth={2}
+                                  strokeDasharray="5 5"
+                                  data={alertState.data}
+                              />
+                          </LineChart>
+                      </ResponsiveContainer>
+                  </div>
+              </CardContent>
+          </Card>
         </DialogContent>
       </Dialog>
     </>
