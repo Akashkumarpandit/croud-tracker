@@ -1,6 +1,6 @@
 import { StatsClient } from '@/components/stats-client';
-import { locations } from '@/lib/data';
+import { initialLocations } from '@/lib/data';
 
 export default function StatisticsPage() {
-  return <StatsClient locations={locations} />;
+  return <StatsClient locations={initialLocations} />;
 }

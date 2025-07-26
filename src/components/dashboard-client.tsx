@@ -20,7 +20,7 @@ import { Line, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContai
 
 
 interface DashboardClientProps {
-  locations: Location[];
+  initialLocations: Location[];
 }
 
 interface AlertState {
@@ -30,7 +30,7 @@ interface AlertState {
   data: { time: string; density: number }[];
 }
 
-export function DashboardClient({ locations: initialLocations }: DashboardClientProps) {
+export function DashboardClient({ initialLocations }: DashboardClientProps) {
   const [locations, setLocations] = useState<Location[]>(initialLocations);
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(locations[0] || null);
   const [isAIPending, startAITransition] = useTransition();
@@ -183,15 +183,6 @@ export function DashboardClient({ locations: initialLocations }: DashboardClient
                     onClick={() => setSelectedLocation(location)}
                   >
                     <CardHeader>
-                      <div className="relative aspect-[16/9] w-full mb-4">
-                         <Image
-                            src={location.imageUrl}
-                            alt={location.name}
-                            fill
-                            className="rounded-lg object-cover"
-                            data-ai-hint={location.dataAiHint}
-                         />
-                      </div>
                       <CardTitle className="flex items-center justify-between">
                         <span className="flex items-center gap-2">
                           <MapPin className="h-5 w-5" />

@@ -4,6 +4,4 @@ export interface Location {
   currentDensity: number;
   maxCapacity: number;
   historicalData: { time: string; density: number }[];
-  imageUrl: string;
-  dataAiHint: string;
 }
