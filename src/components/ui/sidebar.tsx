@@ -21,8 +21,8 @@ import {
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state"
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
-const SIDEBAR_WIDTH = "16rem"
-const SIDEBAR_WIDTH_MOBILE = "18rem"
+const SIDEBAR_WIDTH = "24rem"
+const SIDEBAR_WIDTH_MOBILE = "24rem"
 const SIDEBAR_WIDTH_ICON = "3rem"
 const SIDEBAR_KEYBOARD_SHORTCUT = "b"
 
@@ -168,7 +168,7 @@ const Sidebar = React.forwardRef<
     {
       side = "left",
       variant = "sidebar",
-      collapsible = "offcanvas",
+      collapsible = "icon",
       className,
       children,
       ...props
@@ -364,6 +364,22 @@ const SidebarHeader = React.forwardRef<
   )
 })
 SidebarHeader.displayName = "SidebarHeader"
+
+const SidebarTitle = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn(
+      "text-lg p-2 font-semibold leading-none tracking-tight",
+      className
+    )}
+    {...props}
+  />
+))
+SidebarTitle.displayName = "SidebarTitle"
+
 
 const SidebarFooter = React.forwardRef<
   HTMLDivElement,
@@ -759,5 +775,6 @@ export {
   SidebarRail,
   SidebarSeparator,
   SidebarTrigger,
+  SidebarTitle,
   useSidebar,
 }

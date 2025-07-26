@@ -1,6 +1,7 @@
 'use server';
 
 import { crowdDensityAlert } from '@/ai/flows/crowd-density-alert';
+import { detectCrowdFromImage } from '@/ai/flows/detect-crowd-flow';
 import type { Location } from '@/lib/types';
 
 export async function getCrowdAlert(location: Location) {
@@ -18,5 +19,15 @@ export async function getCrowdAlert(location: Location) {
   } catch (error) {
     console.error(error);
     return { success: false, message: 'Failed to generate alert. Please try again.' };
+  }
+}
+
+export async function getRealtimeCrowdDensity(imageDataUri: string) {
+  try {
+    const result = await detectCrowdFromImage({ imageDataUri });
+    return { success: true, density: result.crowdDensity };
+  } catch (error) {
+    console.error('Error detecting crowd from image:', error);
+    return { success: false, message: 'Failed to analyze image.' };
   }
 }
