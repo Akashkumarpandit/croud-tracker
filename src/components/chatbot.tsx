@@ -78,7 +78,7 @@ export function Chatbot() {
     <>
       <div className="fixed bottom-4 left-4 z-50">
         <Button onClick={() => setIsOpen(!isOpen)} size="icon" className="rounded-full h-14 w-14 shadow-lg">
-          <MessageSquare className="h-6 w-6" />
+          <Sparkles className="h-6 w-6" />
           <span className="sr-only">Toggle Chat</span>
         </Button>
       </div>
@@ -115,6 +115,7 @@ export function Chatbot() {
                     >
                       {message.role === 'model' && (
                           <Avatar className="h-8 w-8">
+                              <AvatarImage src="https://placehold.co/40x40.png" alt="AI Assistant" data-ai-hint="robot" />
                               <AvatarFallback className="bg-primary text-primary-foreground">AI</AvatarFallback>
                           </Avatar>
                       )}
@@ -138,6 +139,7 @@ export function Chatbot() {
                   {isPending && (
                     <div className="flex justify-start gap-3 text-sm">
                       <Avatar className="h-8 w-8">
+                          <AvatarImage src="https://placehold.co/40x40.png" alt="AI Assistant" data-ai-hint="robot" />
                           <AvatarFallback className="bg-primary text-primary-foreground">AI</AvatarFallback>
                       </Avatar>
                       <div className="rounded-lg px-3 py-2 bg-muted flex items-center">
