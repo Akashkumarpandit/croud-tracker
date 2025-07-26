@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Camera, LayoutDashboard } from "lucide-react"
+import { BarChartHorizontal, Camera, LayoutDashboard } from "lucide-react"
 import { cn } from "@/lib/utils"
 import {
   Tooltip,
@@ -13,6 +13,7 @@ import {
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/realtime", label: "Real-time", icon: Camera },
+  { href: "/statistics", label: "Statistics", icon: BarChartHorizontal },
 ]
 
 export function MainNav() {
