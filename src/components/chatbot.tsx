@@ -16,6 +16,12 @@ export interface Message {
   text: string;
 }
 
+const starterMessages = [
+    "What can this app do?",
+    "How do I add a new location?",
+    "Explain the real-time view.",
+];
+
 export function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -32,17 +38,19 @@ export function Chatbot() {
       });
     }
   }, [messages]);
+  
+  const sendMessage = (messageText: string) => {
+    if (!messageText.trim() || isPending) return;
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim() || isPending) return;
-
-    const userMessage: Message = { role: 'user', text: input };
+    const userMessage: Message = { role: 'user', text: messageText };
     setMessages(prev => [...prev, userMessage]);
-    setInput('');
+    
+    if(input) {
+        setInput('');
+    }
 
     startTransition(async () => {
-      const result = await getChatReply(messages, input);
+      const result = await getChatReply(messages, messageText);
       if (result.success && result.reply) {
         const modelMessage: Message = { role: 'model', text: result.reply };
         setMessages(prev => [...prev, modelMessage]);
@@ -55,6 +63,15 @@ export function Chatbot() {
         setMessages(prev => prev.slice(0, -1));
       }
     });
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    sendMessage(input);
+  };
+  
+  const handleStarterClick = (question: string) => {
+    sendMessage(question);
   };
 
   return (
@@ -75,48 +92,61 @@ export function Chatbot() {
           </CardHeader>
           <CardContent className="flex-1 overflow-hidden">
             <ScrollArea className="h-full pr-4" ref={scrollAreaRef}>
-              <div className="space-y-4">
-                {messages.map((message, index) => (
-                  <div
-                    key={index}
-                    className={cn(
-                      'flex gap-3 text-sm',
-                      message.role === 'user' ? 'justify-end' : 'justify-start'
-                    )}
-                  >
-                    {message.role === 'model' && (
-                        <Avatar className="h-8 w-8">
-                            <AvatarFallback className="bg-primary text-primary-foreground">AI</AvatarFallback>
-                        </Avatar>
-                    )}
+              {messages.length === 0 ? (
+                 <div className="p-4 text-center text-sm text-muted-foreground">
+                    <p className="mb-4">Hi! I'm your AI assistant for CrowdWatch. Ask me anything about the app.</p>
+                    <div className="flex flex-col gap-2 text-left">
+                        {starterMessages.map((q, i) => (
+                            <Button key={i} variant="outline" size="sm" className="h-auto whitespace-normal" onClick={() => handleStarterClick(q)}>
+                                {q}
+                            </Button>
+                        ))}
+                    </div>
+                 </div>
+              ) : (
+                <div className="space-y-4">
+                  {messages.map((message, index) => (
                     <div
+                      key={index}
                       className={cn(
-                        'rounded-lg px-3 py-2',
-                        message.role === 'user'
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-muted'
+                        'flex gap-3 text-sm',
+                        message.role === 'user' ? 'justify-end' : 'justify-start'
                       )}
                     >
-                      {message.text}
+                      {message.role === 'model' && (
+                          <Avatar className="h-8 w-8">
+                              <AvatarFallback className="bg-primary text-primary-foreground">AI</AvatarFallback>
+                          </Avatar>
+                      )}
+                      <div
+                        className={cn(
+                          'rounded-lg px-3 py-2',
+                          message.role === 'user'
+                            ? 'bg-primary text-primary-foreground'
+                            : 'bg-muted'
+                        )}
+                      >
+                        {message.text}
+                      </div>
+                       {message.role === 'user' && (
+                          <Avatar className="h-8 w-8">
+                              <AvatarFallback><User/></AvatarFallback>
+                          </Avatar>
+                      )}
                     </div>
-                     {message.role === 'user' && (
-                        <Avatar className="h-8 w-8">
-                            <AvatarFallback><User/></AvatarFallback>
-                        </Avatar>
-                    )}
-                  </div>
-                ))}
-                {isPending && (
-                  <div className="flex justify-start gap-3 text-sm">
-                    <Avatar className="h-8 w-8">
-                        <AvatarFallback className="bg-primary text-primary-foreground">AI</AvatarFallback>
-                    </Avatar>
-                    <div className="rounded-lg px-3 py-2 bg-muted flex items-center">
-                        <Loader2 className="h-4 w-4 animate-spin"/>
+                  ))}
+                  {isPending && (
+                    <div className="flex justify-start gap-3 text-sm">
+                      <Avatar className="h-8 w-8">
+                          <AvatarFallback className="bg-primary text-primary-foreground">AI</AvatarFallback>
+                      </Avatar>
+                      <div className="rounded-lg px-3 py-2 bg-muted flex items-center">
+                          <Loader2 className="h-4 w-4 animate-spin"/>
+                      </div>
                     </div>
-                  </div>
-                )}
-              </div>
+                  )}
+                </div>
+              )}
             </ScrollArea>
           </CardContent>
           <CardFooter>
