@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useTransition } from 'react';
@@ -181,27 +182,25 @@ export function DashboardClient({ locations: initialLocations }: DashboardClient
                     )}
                     onClick={() => setSelectedLocation(location)}
                   >
-                    <CardHeader className='p-0'>
-                      <div className="relative aspect-[16/9] w-full">
+                    <CardHeader>
+                      <div className="relative aspect-[16/9] w-full mb-4">
                          <Image
                             src={location.imageUrl}
                             alt={location.name}
                             fill
-                            className="rounded-t-lg object-cover"
+                            className="rounded-lg object-cover"
                             data-ai-hint={location.dataAiHint}
                          />
                       </div>
-                      <div className="p-6">
-                        <CardTitle className="flex items-center justify-between">
-                          <span className="flex items-center gap-2">
-                            <MapPin className="h-5 w-5" />
-                            {location.name}
-                          </span>
-                          <Badge variant={densityInfo.variant} className={densityInfo.className}>
-                            {densityInfo.level}
-                          </Badge>
-                        </CardTitle>
-                      </div>
+                      <CardTitle className="flex items-center justify-between">
+                        <span className="flex items-center gap-2">
+                          <MapPin className="h-5 w-5" />
+                          {location.name}
+                        </span>
+                        <Badge variant={densityInfo.variant} className={densityInfo.className}>
+                          {densityInfo.level}
+                        </Badge>
+                      </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="flex items-center gap-2 text-muted-foreground">
