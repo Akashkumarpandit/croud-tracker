@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 import { AppShell } from '@/components/app-shell';
+import { Chatbot } from '@/components/chatbot';
 
 export const metadata: Metadata = {
   title: 'CrowdWatch',
@@ -27,6 +28,7 @@ export default function RootLayout({
         <AppShell>
           {children}
         </AppShell>
+        <Chatbot />
         <Toaster />
       </body>
     </html>
